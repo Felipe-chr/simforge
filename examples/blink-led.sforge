@@ -1,0 +1,111 @@
+{
+  "format": "simforge.project",
+  "schema": 1,
+  "project": {
+    "id": "01KA3EHR09BY8SSYXCDSV8F9KE",
+    "name": "Blink LED",
+    "revision": 1
+  },
+  "units": {
+    "length": "mm",
+    "grid_mm": 1.27,
+    "voltage": "V",
+    "current": "A",
+    "resistance": "ohm",
+    "time": "ns"
+  },
+  "boards": [
+    {
+      "id": "01KA3EHR01V3RS3DTR98H6BCFN",
+      "type": "simforge.esp32s3.devkitc",
+      "type_version": 1,
+      "position": { "x": 118, "y": 128 },
+      "rotation": 0,
+      "label": "U1",
+      "params": {},
+      "pins": {
+        "GPIO2": { "net": "N1" },
+        "GPIO0": { "net": "N3" },
+        "GND": { "net": "N2" }
+      }
+    }
+  ],
+  "devices": [
+    {
+      "id": "01KA3EHR02YAJDSX5VK7TBXABK",
+      "type": "simforge.led",
+      "type_version": 1,
+      "position": { "x": 744, "y": 232 },
+      "rotation": 0,
+      "label": "D1",
+      "params": { "color": "red" },
+      "pins": {
+        "A": { "net": "N1" },
+        "K": { "net": "N2" }
+      }
+    },
+    {
+      "id": "01KA3EHR03HD99FDTGJ8YEPFZX",
+      "type": "simforge.button",
+      "type_version": 1,
+      "position": { "x": 744, "y": 392 },
+      "rotation": 0,
+      "label": "SW1",
+      "params": { "pull": "up" },
+      "pins": {
+        "1": { "net": "N3" },
+        "2": { "net": "N2" }
+      }
+    }
+  ],
+  "nets": [
+    {
+      "id": "N1",
+      "name": "LED_A",
+      "kind": "digital",
+      "pins": [
+        { "board": "01KA3EHR01V3RS3DTR98H6BCFN", "pin": "GPIO2" },
+        { "device": "01KA3EHR02YAJDSX5VK7TBXABK", "pin": "A" }
+      ]
+    },
+    {
+      "id": "N2",
+      "name": "GND",
+      "kind": "ground",
+      "pins": [
+        { "board": "01KA3EHR01V3RS3DTR98H6BCFN", "pin": "GND" },
+        { "device": "01KA3EHR02YAJDSX5VK7TBXABK", "pin": "K" },
+        { "device": "01KA3EHR03HD99FDTGJ8YEPFZX", "pin": "2" }
+      ]
+    },
+    {
+      "id": "N3",
+      "name": "BTN",
+      "kind": "digital",
+      "pins": [
+        { "board": "01KA3EHR01V3RS3DTR98H6BCFN", "pin": "GPIO0" },
+        { "device": "01KA3EHR03HD99FDTGJ8YEPFZX", "pin": "1" }
+      ]
+    }
+  ],
+  "wires": [],
+  "firmware": {
+    "entry": "src/main.cpp",
+    "backend": "platformio",
+    "framework": "arduino",
+    "libraries": []
+  },
+  "simulation": {
+    "solver": "auto",
+    "seed": 0,
+    "slice_us": 1000,
+    "analog_step_us": 10,
+    "real_time": false
+  },
+  "layout": {
+    "zoom": 1.0,
+    "pan": { "x": 0, "y": 0 },
+    "grid": true
+  },
+  "extensions": {}
+}

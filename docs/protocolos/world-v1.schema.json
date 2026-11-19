@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://simforge.dev/schemas/world-v1.json",
+  "title": "SimForge World Protocol v1",
+  "description": "Mensagens de integração entre SimForge e mundos externos.",
+  "oneOf": [
+    { "$ref": "#/$defs/hello" },
+    { "$ref": "#/$defs/caps" },
+    { "$ref": "#/$defs/ready" },
+    { "$ref": "#/$defs/sync" },
+    { "$ref": "#/$defs/synced" },
+    { "$ref": "#/$defs/read" },
+    { "$ref": "#/$defs/readResult" },
+    { "$ref": "#/$defs/write" },
+    { "$ref": "#/$defs/writeResult" },
+    { "$ref": "#/$defs/event" },
+    { "$ref": "#/$defs/error" },
+    { "$ref": "#/$defs/bye" }
+  ],
+  "$defs": {
+    "value": {
+      "anyOf": [
+        { "type": "number" },
+        { "type": "string" },
+        { "type": "boolean" },
+        { "type": "object" },
+        { "type": "array" },
+        { "type": "null" }
+      ]
+    },
+    "quality": {
+      "type": "string",
+      "enum": ["good", "stale", "unavailable"]
+    },
+    "entity": {
+      "type": "object",
+      "required": ["id", "kind", "type", "schema"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "kind": {
+          "type": "string",
+          "enum": ["sensor", "actuator", "bidirectional"]
+        },
+        "type": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "unit": { "type": ["string", "null"], "maxLength": 32 },
+        "schema": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "hello": {
+      "type": "object",
+      "required": ["type", "seq", "t_ns", "protocol_version", "session_id"],
+      "properties": {
+        "type": { "const": "world.hello" },
+        "seq": { "type": "integer", "minimum": 0 },
+        "t_ns": { "type": "integer" },
+        "protocol_version": { "type": "integer", "minimum": 1 },
+        "session_id": { "type": "string", "maxLength": 128 },
+        "simforge_version": { "type": "string", "maxLength": 64 },
+        "token": { "type": "string", "maxLength": 512 }
+      },
+      "additionalProperties": true
+    },
+    "caps": {
+      "type": "object",
+      "required": ["type", "seq", "t_ns", "world_id", "protocol_version", "entities"],
+      "properties": {
+        "type": { "const": "world.caps" },
+        "seq": { "type": "integer", "minimum": 0 },
+        "t_ns": { "type": "integer" },
+        "world_id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 200 },
+        "protocol_version": { "type": "integer", "minimum": 1 },
+        "entities": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/entity" },
+          "maxItems": 10000
+        },
+        "features": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 64 }
+        },
+        "rates": {
+          "type": "object",
+          "properties": {
+            "max_reads_per_s": { "type": "integer", "minimum": 1 },
+            "max_events_per_s": { "type": "integer", "minimum": 1 }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "ready": {
+      "type": "object",
+      "required": ["type", "seq", "t_ns", "t0_ns"],
+      "properties": {
+        "type": { "const": "world.ready" },
+        "seq": { "type": "integer", "minimum": 0 },
+        "t_ns": { "type": "integer" },
+        "t0_ns": { "type": "integer" },
+        "features": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "sync": {
+      "type": "object",
+      "required": ["type", "seq", "t_ns"],
+      "properties": {
+        "type": { "const": "world.sync" },
+        "seq": { "type": "integer", "minimum": 0 },
+        "t_ns": { "type": "integer" }
+      },
+      "additionalProperties": true
+    },
+    "synced": {
+      "type": "object",
+      "required": ["type", "seq", "t_ns"],
+      "properties": {
+        "type": { "const": "world.synced" },
+        "seq": { "type": "integer", "minimum": 0 },
+        "t_ns": { "type": "integer" }
+      },
+      "additionalProperties": true
+    },
+    "read": {
+      "type": "object",
+      "required": ["type", "seq", "t_ns", "request_id", "entity"],
+      "properties": {
+        "type": { "const": "world.read" },
+        "seq": { "type": "integer", "minimum": 0 },
+        "t_ns": { "type": "integer" },
+        "request_id": { "type": "string", "maxLength": 128 },
+        "entity": { "type": "string", "maxLength": 200 }
+      },
+      "additionalProperties": true
+    },
+    "readResult": {
+      "type": "object",
+      "required": ["type", "seq", "t_ns", "request_id", "value", "valid_at", "quality"],
+      "properties": {
+        "type": { "const": "world.read.result" },
+        "seq": { "type": "integer", "minimum": 0 },
+        "t_ns": { "type": "integer" },
+        "request_id": { "type": "string", "maxLength": 128 },
+        "value": { "$ref": "#/$defs/value" },
+        "valid_at": { "type": "integer" },
+        "quality": { "$ref": "#/$defs/quality" }
+      },
+      "additionalProperties": true
+    },
+    "write": {
+      "type": "object",
+      "required": ["type", "seq", "t_ns", "request_id", "entity", "value"],
+      "properties": {
+        "type": { "const": "world.write" },
+        "seq": { "type": "integer", "minimum": 0 },
+        "t_ns": { "type": "integer" },
+        "request_id": { "type": "string", "maxLength": 128 },
+        "entity": { "type": "string", "maxLength": 200 },
+        "value": { "$ref": "#/$defs/value" },
+        "effective_at": { "type": "integer" }
+      },
+      "additionalProperties": true
+    },
+    "writeResult": {
+      "type": "object",
+      "required": ["type", "seq", "t_ns", "request_id", "applied"],
+      "properties": {
+        "type": { "const": "world.write.result" },
+        "seq": { "type": "integer", "minimum": 0 },
+        "t_ns": { "type": "integer" },
+        "request_id": { "type": "string", "maxLength": 128 },
+        "applied": { "type": "boolean" },
+        "effective_at": { "type": "integer" },
+        "reason": { "type": "string", "maxLength": 512 }
+      },
+      "additionalProperties": true
+    },
+    "event": {
+      "type": "object",
+      "required": ["type", "seq", "t_ns", "entity", "value", "quality"],
+      "properties": {
+        "type": { "const": "world.event" },
+        "seq": { "type": "integer", "minimum": 0 },
+        "t_ns": { "type": "integer" },
+        "entity": { "type": "string", "maxLength": 200 },
+        "value": { "$ref": "#/$defs/value" },
+        "quality": { "$ref": "#/$defs/quality" },
+        "late": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "error": {
+      "type": "object",
+      "required": ["type", "seq", "t_ns", "code", "message"],
+      "properties": {
+        "type": { "const": "world.error" },
+        "seq": { "type": "integer", "minimum": 0 },
+        "t_ns": { "type": "integer" },
+        "request_id": { "type": "string", "maxLength": 128 },
+        "code": {
+          "type": "string",
+          "enum": [
+            "protocol_unsupported",
+            "invalid_message",
+            "entity_not_found",
+            "value_rejected",
+            "busy",
+            "timeout",
+            "internal_error"
+          ]
+        },
+        "message": { "type": "string", "maxLength": 1000 },
+        "retryable": { "type": "boolean" },
+        "details": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "bye": {
+      "type": "object",
+      "required": ["type", "seq", "t_ns", "reason"],
+      "properties": {
+        "type": { "const": "world.bye" },
+        "seq": { "type": "integer", "minimum": 0 },
+        "t_ns": { "type": "integer" },
+        "reason": { "type": "string", "maxLength": 512 }
+      },
+      "additionalProperties": true
+    }
+  }
+}

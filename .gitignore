@@ -1,0 +1,34 @@
+# Build CMake
+build/
+out/
+cmake-build-*/
+CMakeUserPresets.json
+
+# Binários e artefatos
+*.exe
+*.dll
+*.lib
+*.pdb
+*.ilk
+*.obj
+*.o
+*.a
+*.so
+*.dylib
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs e temporários
+*.log
+*.tmp
+*.swp

@@ -1,0 +1,334 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://simforge.dev/schemas/sforge-v1.json",
+  "title": "SimForge project (.sforge) v1",
+  "type": "object",
+  "required": ["format", "schema", "project", "boards", "devices", "nets"],
+  "properties": {
+    "format": { "const": "simforge.project" },
+    "schema": { "const": 1 },
+    "project": { "$ref": "#/$defs/project" },
+    "units": { "$ref": "#/$defs/units" },
+    "boards": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/board" }
+    },
+    "devices": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/device" }
+    },
+    "nets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/net" }
+    },
+    "buses": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/bus" }
+    },
+    "wires": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/wire" }
+    },
+    "firmware": { "$ref": "#/$defs/firmware" },
+    "simulation": { "$ref": "#/$defs/simulation" },
+    "layout": { "$ref": "#/$defs/layout" },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "ulid": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "typeId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(\\.[a-z0-9][a-z0-9_-]*)+$",
+      "maxLength": 128
+    },
+    "point": {
+      "type": "object",
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "integer", "minimum": -1000000000, "maximum": 1000000000 },
+        "y": { "type": "integer", "minimum": -1000000000, "maximum": 1000000000 }
+      },
+      "additionalProperties": false
+    },
+    "rotation": {
+      "type": "integer",
+      "enum": [0, 90, 180, 270]
+    },
+    "project": {
+      "type": "object",
+      "required": ["id", "name", "revision"],
+      "properties": {
+        "id": { "$ref": "#/$defs/ulid" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "revision": { "type": "integer", "minimum": 0 },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "description": { "type": "string", "maxLength": 2000 },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 48 },
+          "maxItems": 32
+        }
+      },
+      "additionalProperties": true
+    },
+    "units": {
+      "type": "object",
+      "properties": {
+        "length": { "const": "mm" },
+        "grid_mm": { "type": "number", "exclusiveMinimum": 0 },
+        "voltage": { "const": "V" },
+        "current": { "const": "A" },
+        "resistance": { "const": "ohm" },
+        "time": { "const": "ns" }
+      },
+      "additionalProperties": true
+    },
+    "pinAssignment": {
+      "type": "object",
+      "required": ["net"],
+      "properties": {
+        "net": { "type": "string", "minLength": 1, "maxLength": 128 }
+      },
+      "additionalProperties": true
+    },
+    "pinMap": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/pinAssignment" }
+    },
+    "board": {
+      "type": "object",
+      "required": ["id", "type", "type_version", "position"],
+      "properties": {
+        "id": { "$ref": "#/$defs/ulid" },
+        "type": { "$ref": "#/$defs/typeId" },
+        "type_version": { "type": "integer", "minimum": 1 },
+        "position": { "$ref": "#/$defs/point" },
+        "rotation": { "$ref": "#/$defs/rotation" },
+        "label": { "type": "string", "maxLength": 200 },
+        "params": { "type": "object" },
+        "pins": { "$ref": "#/$defs/pinMap" },
+        "hidden": { "type": "boolean" },
+        "locked": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "device": {
+      "type": "object",
+      "required": ["id", "type", "type_version", "position", "pins"],
+      "properties": {
+        "id": { "$ref": "#/$defs/ulid" },
+        "type": { "$ref": "#/$defs/typeId" },
+        "type_version": { "type": "integer", "minimum": 1 },
+        "position": { "$ref": "#/$defs/point" },
+        "rotation": { "$ref": "#/$defs/rotation" },
+        "label": { "type": "string", "maxLength": 200 },
+        "params": { "type": "object" },
+        "pins": { "$ref": "#/$defs/pinMap" },
+        "hidden": { "type": "boolean" },
+        "locked": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "pinRef": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["board", "pin"],
+          "properties": {
+            "board": { "$ref": "#/$defs/ulid" },
+            "pin": { "type": "string", "minLength": 1, "maxLength": 64 }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["device", "pin"],
+          "properties": {
+            "device": { "$ref": "#/$defs/ulid" },
+            "pin": { "type": "string", "minLength": 1, "maxLength": 64 }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "net": {
+      "type": "object",
+      "required": ["id", "kind", "pins"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128 },
+        "kind": {
+          "type": "string",
+          "enum": ["digital", "analog", "power", "ground", "bus"]
+        },
+        "pins": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/pinRef" },
+          "maxItems": 10000
+        },
+        "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+      },
+      "additionalProperties": true
+    },
+    "busController": {
+      "type": "object",
+      "required": ["board"],
+      "properties": {
+        "board": { "$ref": "#/$defs/ulid" },
+        "peripheral": { "type": "string", "maxLength": 64 }
+      },
+      "additionalProperties": true
+    },
+    "bus": {
+      "type": "object",
+      "required": ["id", "kind", "controller"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "kind": {
+          "type": "string",
+          "enum": ["i2c", "spi", "uart", "onewire", "pwm"]
+        },
+        "controller": { "$ref": "#/$defs/busController" },
+        "sda": { "type": "string", "maxLength": 128 },
+        "scl": { "type": "string", "maxLength": 128 },
+        "sclk": { "type": "string", "maxLength": 128 },
+        "mosi": { "type": "string", "maxLength": 128 },
+        "miso": { "type": "string", "maxLength": 128 },
+        "cs": { "type": "string", "maxLength": 128 },
+        "tx": { "type": "string", "maxLength": 128 },
+        "rx": { "type": "string", "maxLength": 128 },
+        "dq": { "type": "string", "maxLength": 128 },
+        "signal": { "type": "string", "maxLength": 128 },
+        "clock_hz": { "type": "integer", "minimum": 1, "maximum": 100000000 },
+        "frequency_hz": { "type": "integer", "minimum": 1, "maximum": 100000000 },
+        "baud": { "type": "integer", "minimum": 1, "maximum": 10000000 },
+        "data_bits": { "type": "integer", "minimum": 5, "maximum": 9 },
+        "parity": { "type": "string", "enum": ["none", "even", "odd"] },
+        "stop_bits": { "type": "integer", "enum": [1, 2] },
+        "mode": { "type": "integer", "enum": [0, 1, 2, 3] },
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "device": { "$ref": "#/$defs/ulid" },
+              "address": { "type": "integer", "minimum": 0, "maximum": 127 },
+              "cs": { "type": "string", "maxLength": 128 }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "i2c" } }, "required": ["kind"] },
+          "then": { "required": ["sda", "scl", "clock_hz"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "spi" } }, "required": ["kind"] },
+          "then": { "required": ["sclk", "mosi", "miso", "clock_hz", "mode"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "uart" } }, "required": ["kind"] },
+          "then": { "required": ["tx", "rx", "baud"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "onewire" } }, "required": ["kind"] },
+          "then": { "required": ["dq"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "pwm" } }, "required": ["kind"] },
+          "then": { "required": ["signal", "frequency_hz"] }
+        }
+      ],
+      "additionalProperties": true
+    },
+    "wire": {
+      "type": "object",
+      "required": ["id", "net", "points"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "net": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "points": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/point" },
+          "minItems": 2,
+          "maxItems": 10000
+        },
+        "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "width": { "type": "number", "exclusiveMinimum": 0, "maximum": 32 }
+      },
+      "additionalProperties": true
+    },
+    "library": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "version": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "source": { "type": "string", "maxLength": 512 }
+      },
+      "additionalProperties": true
+    },
+    "firmware": {
+      "type": "object",
+      "required": ["entry"],
+      "properties": {
+        "entry": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "backend": {
+          "type": "string",
+          "enum": ["platformio", "arduino-cli", "esp-idf", "shim"]
+        },
+        "framework": {
+          "type": "string",
+          "enum": ["arduino", "esp-idf", "baremetal"]
+        },
+        "libraries": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/library" },
+          "maxItems": 256
+        },
+        "defines": {
+          "type": "object",
+          "additionalProperties": { "type": "string", "maxLength": 512 }
+        },
+        "artifact": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "build_id": { "type": "string", "maxLength": 128 }
+      },
+      "additionalProperties": true
+    },
+    "simulation": {
+      "type": "object",
+      "properties": {
+        "solver": { "type": "string", "enum": ["logic", "mna", "auto"] },
+        "seed": { "type": "integer", "minimum": 0 },
+        "slice_us": { "type": "integer", "minimum": 100, "maximum": 10000 },
+        "analog_step_us": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "real_time": { "type": "boolean" },
+        "max_run_ns": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": true
+    },
+    "layout": {
+      "type": "object",
+      "properties": {
+        "zoom": { "type": "number", "exclusiveMinimum": 0, "maximum": 1000 },
+        "pan": { "$ref": "#/$defs/point" },
+        "grid": { "type": "boolean" },
+        "theme": { "type": "string", "maxLength": 32 }
+      },
+      "additionalProperties": true
+    }
+  }
+}

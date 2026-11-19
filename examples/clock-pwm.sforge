@@ -1,0 +1,98 @@
+{
+  "format": "simforge.project",
+  "schema": 1,
+  "project": {
+    "id": "01KA3EHR09BY8SSYXCDSV8F9KG",
+    "name": "Clock PWM",
+    "revision": 1
+  },
+  "units": {
+    "length": "mm",
+    "grid_mm": 1.27,
+    "voltage": "V",
+    "current": "A",
+    "resistance": "ohm",
+    "time": "ns"
+  },
+  "boards": [
+    {
+      "id": "01KA3EHR01V3RS3DTR98H6BCFP",
+      "type": "simforge.esp32s3.devkitc",
+      "type_version": 1,
+      "position": { "x": 118, "y": 128 },
+      "rotation": 0,
+      "label": "U1",
+      "params": {},
+      "pins": {
+        "GND": { "net": "N2" }
+      }
+    }
+  ],
+  "devices": [
+    {
+      "id": "01KA3EHR04HD99FDTGJ8YEPFZY",
+      "type": "simforge.clock",
+      "type_version": 1,
+      "position": { "x": 320, "y": 232 },
+      "rotation": 0,
+      "label": "CLK1",
+      "params": { "freq_hz": 2, "duty": 0.5 },
+      "pins": {
+        "OUT": { "net": "N1" }
+      }
+    },
+    {
+      "id": "01KA3EHR02YAJDSX5VK7TBXABM",
+      "type": "simforge.led",
+      "type_version": 1,
+      "position": { "x": 744, "y": 232 },
+      "rotation": 0,
+      "label": "D1",
+      "params": { "color": "red" },
+      "pins": {
+        "A": { "net": "N1" },
+        "K": { "net": "N2" }
+      }
+    }
+  ],
+  "nets": [
+    {
+      "id": "N1",
+      "name": "CLK",
+      "kind": "digital",
+      "pins": [
+        { "device": "01KA3EHR04HD99FDTGJ8YEPFZY", "pin": "OUT" },
+        { "device": "01KA3EHR02YAJDSX5VK7TBXABM", "pin": "A" }
+      ]
+    },
+    {
+      "id": "N2",
+      "name": "GND",
+      "kind": "ground",
+      "pins": [
+        { "board": "01KA3EHR01V3RS3DTR98H6BCFP", "pin": "GND" },
+        { "device": "01KA3EHR02YAJDSX5VK7TBXABM", "pin": "K" }
+      ]
+    }
+  ],
+  "wires": [],
+  "firmware": {
+    "entry": "src/main.cpp",
+    "backend": "platformio",
+    "framework": "arduino",
+    "libraries": []
+  },
+  "simulation": {
+    "solver": "auto",
+    "seed": 0,
+    "slice_us": 1000,
+    "analog_step_us": 10,
+    "real_time": false
+  },
+  "layout": {
+    "zoom": 1.0,
+    "pan": { "x": 0, "y": 0 },
+    "grid": true
+  },
+  "extensions": {}
+}

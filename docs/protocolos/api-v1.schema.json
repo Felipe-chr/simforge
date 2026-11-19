@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://simforge.dev/schemas/api-v1.json",
+  "title": "SimForge API v1 envelope",
+  "description": "Envelope de comandos, respostas e eventos da API v1. Params e results por método são definidos nas tabelas de api-v1.md e validados pelo servidor.",
+  "oneOf": [
+    { "$ref": "#/$defs/request" },
+    { "$ref": "#/$defs/response" },
+    { "$ref": "#/$defs/errorResponse" },
+    { "$ref": "#/$defs/event" }
+  ],
+  "$defs": {
+    "ulid": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "method": {
+      "type": "string",
+      "pattern": "^[a-z][a-zA-Z0-9]*(\\.[a-zA-Z][a-zA-Z0-9]*)+$",
+      "maxLength": 128
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "api_version": { "type": "integer", "minimum": 1 },
+        "client": { "type": "string", "maxLength": 128 },
+        "idempotency_key": { "type": "string", "maxLength": 128 },
+        "revision": { "$ref": "#/$defs/revision" },
+        "t_ns": { "type": "integer" },
+        "trace_id": { "type": "string", "maxLength": 128 },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "request": {
+      "type": "object",
+      "required": ["id", "method"],
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "method": { "$ref": "#/$defs/method" },
+        "params": { "type": "object" },
+        "meta": { "$ref": "#/$defs/meta" }
+      },
+      "additionalProperties": false
+    },
+    "error": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "invalid_request",
+            "unknown_method",
+            "invalid_params",
+            "not_found",
+            "conflict",
+            "invalid_state",
+            "busy",
+            "unsupported",
+            "schema_unsupported",
+            "project_invalid",
+            "erc_failed",
+            "sim_not_running",
+            "sim_oscillation",
+            "sim_analog_diverged",
+            "firmware_build_failed",
+            "firmware_hang",
+            "runtime_crashed",
+            "plugin_rejected",
+            "plugin_crashed",
+            "world_unavailable",
+            "world_timeout",
+            "io_error",
+            "permission_denied",
+            "resource_exhausted",
+            "internal_error"
+          ]
+        },
+        "message": { "type": "string" },
+        "details": { "type": "object" },
+        "retryable": { "type": "boolean", "default": false },
+        "trace_id": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "response": {
+      "type": "object",
+      "required": ["id", "ok", "result"],
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "ok": { "const": true },
+        "result": {},
+        "meta": { "$ref": "#/$defs/meta" }
+      },
+      "additionalProperties": false
+    },
+    "errorResponse": {
+      "type": "object",
+      "required": ["id", "ok", "error"],
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "ok": { "const": false },
+        "error": { "$ref": "#/$defs/error" },
+        "meta": { "$ref": "#/$defs/meta" }
+      },
+      "additionalProperties": false
+    },
+    "event": {
+      "type": "object",
+      "required": ["seq", "t_ns", "type", "payload"],
+      "properties": {
+        "seq": { "type": "integer", "minimum": 0 },
+        "t_ns": { "type": "integer" },
+        "type": { "$ref": "#/$defs/method" },
+        "payload": { "type": "object" },
+        "subscription": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "job": {
+      "type": "object",
+      "required": ["job_id", "status"],
+      "properties": {
+        "job_id": { "type": "string", "maxLength": 128 },
+        "status": {
+          "type": "string",
+          "enum": ["queued", "running", "succeeded", "failed", "cancelled"]
+        },
+        "progress": { "type": "number", "minimum": 0, "maximum": 1 },
+        "result": {},
+        "error": { "$ref": "#/$defs/error" }
+      },
+      "additionalProperties": true
+    }
+  }
+}

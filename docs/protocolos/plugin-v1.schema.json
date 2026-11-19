@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://simforge.dev/schemas/plugin-v1.json",
+  "title": "SimForge plugin manifest v1",
+  "type": "object",
+  "required": ["format", "schema", "id", "name", "version", "abi", "kind", "entry"],
+  "properties": {
+    "format": { "const": "simforge.plugin" },
+    "schema": { "const": 1 },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(\\.[a-z0-9][a-z0-9_-]*){1,}$",
+      "maxLength": 128
+    },
+    "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+([-+][0-9A-Za-z.-]+)?$",
+      "maxLength": 64
+    },
+    "abi": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "maxLength": 16
+    },
+    "kind": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "device",
+          "board",
+          "compiler",
+          "runtime",
+          "solver",
+          "exporter",
+          "world",
+          "ui"
+        ]
+      }
+    },
+    "entry": {
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "windows": { "type": "string", "maxLength": 512 },
+        "linux": { "type": "string", "maxLength": 512 },
+        "macos": { "type": "string", "maxLength": 512 },
+        "wasm": { "type": "string", "maxLength": 512 }
+      },
+      "additionalProperties": true
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 128 },
+      "maxItems": 128
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(fs|net|process|gpu|audio|display|clipboard)\\.[a-z][a-z0-9_]*(:[A-Za-z0-9._/*-]+)?$",
+        "maxLength": 128
+      },
+      "maxItems": 64
+    },
+    "deterministic": { "type": "boolean" },
+    "thread_model": {
+      "type": "string",
+      "enum": ["main_only", "sim_thread", "any_thread"]
+    },
+    "min_host": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "maxLength": 32
+    },
+    "description": { "type": "string", "maxLength": 2000 },
+    "license": { "type": "string", "maxLength": 64 },
+    "homepage": { "type": "string", "format": "uri", "maxLength": 512 },
+    "signature": {
+      "type": "string",
+      "pattern": "^ed25519:[A-Za-z0-9+/=]+$",
+      "maxLength": 512
+    }
+  },
+  "additionalProperties": true
+}
