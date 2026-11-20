@@ -16,8 +16,19 @@ simulação e dock (console, serial, código, instrumentos).
 
 ## Como rodar
 
+Da raiz do repositório, um comando compila o núcleo (se preciso), instala as
+dependências e abre a UI:
+
 ```powershell
-cd simforge\web
+tools\run.cmd                 # http://localhost:5173
+tools\run.cmd -Rebuild        # recompila o núcleo antes
+tools\run.cmd -Port 5174      # outra porta
+tools\run.cmd -NoOpen         # sem abrir o navegador
+```
+
+Manual, dentro de `web/`:
+
+```powershell
 & "$env:LOCALAPPDATA\nodejs\npm.cmd" install
 & "$env:LOCALAPPDATA\nodejs\npm.cmd" run dev      # http://localhost:5173
 & "$env:LOCALAPPDATA\nodejs\npm.cmd" run build    # tsc -b + vite build
@@ -115,6 +126,11 @@ atual de cada net (`sim.frame`). Os botões `L` / `H` / `Z` enviam
 - **Depois de recompilar o núcleo** — reinicie o dev server (ou salve
   `server/simforge-cli.ts` para forçar o restart): a ponte sobe um processo por
   servidor e não troca o binário em execução.
+- **“não consigo rodar”** — use `..\tools\run.cmd` a partir da raiz: ele resolve
+  npm, build e porta sozinho. Rodar `.\run.ps1` direto pode esbarrar na
+  ExecutionPolicy; o `.cmd` chama o PowerShell com `-ExecutionPolicy Bypass`.
+- **Porta 5173 ocupada** — `..\tools\run.cmd -Port 5174` (ou feche o processo
+  anterior com `taskkill /T /F /PID <pid>`).
 
 ## Notas de implementação
 

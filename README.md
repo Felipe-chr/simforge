@@ -12,6 +12,27 @@ instrumentação e integração com mundos externos.
   frontend visual em `web/` falando com o núcleo pela ponte `simforge-cli api`
   (com `MockTransport` de fallback)
 
+## Rodar a interface (um comando)
+
+```powershell
+tools\run.cmd
+```
+
+Compila o núcleo se ainda não houver `build\release\src\simforge-cli.exe`, instala
+as dependências do frontend na primeira vez, sobe o dev server em
+<http://localhost:5173> e abre o navegador. A UI conversa com o núcleo real pela
+ponte `simforge-cli api`; sem o executável, cai no mock.
+
+```powershell
+tools\run.cmd -Rebuild      # recompila o núcleo antes de subir
+tools\run.cmd -Port 5174    # outra porta
+tools\run.cmd -NoOpen       # não abre o navegador
+```
+
+Os `.cmd` existem para não depender da ExecutionPolicy do PowerShell. O
+equivalente explícito é
+`powershell -NoProfile -ExecutionPolicy Bypass -File tools\run.ps1`.
+
 ## Compilação e testes
 
 Requisitos: CMake ≥ 3.24, Ninja e MSVC (Visual Studio com workload C++). O
@@ -19,10 +40,13 @@ script localiza a toolchain via `vswhere` e configura o ambiente sozinho.
 
 ```powershell
 # Build + testes (preset release; recomendado no Windows com WDAC)
-.\tools\build.ps1 -Preset release -Test
+tools\build.cmd -Preset release -Test
+
+# Equivalente sem o atalho
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\build.ps1 -Preset release -Test
 
 # Build de desenvolvimento
-.\tools\build.ps1 -Preset dev
+tools\build.cmd -Preset dev
 
 # Ou direto pelo CMake
 cmake --preset release
