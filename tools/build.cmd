@@ -2,4 +2,9 @@
 rem Atalho para tools\build.ps1 sem depender da ExecutionPolicy.
 rem Uso: tools\build.cmd [-Preset release] [-Test] [-Clean]
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0build.ps1" %*
+if errorlevel 1 (
+  echo.
+  echo Falhou. Pressione uma tecla para fechar.
+  pause >nul
+)
 exit /b %ERRORLEVEL%
